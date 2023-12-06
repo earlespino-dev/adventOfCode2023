@@ -3,8 +3,14 @@ const fs = require('fs');
 // const inputArray = fs.readFileSync('./test.txt', 'utf-8').split('\n');
 const inputArray = fs.readFileSync('./input.txt', 'utf-8').split('\n');
 
-const isNumberAdjacentToSymbol = ({ row, col }) => {
+const matrix = inputArray.reduce((rows, row) => {
+    rows.push(row.trim().split(''));
+    return rows;
+}, []);
 
+// fs.writeFileSync('./matrix.json', JSON.stringify(matrix));
+
+const isNumberAdjacentToSymbol = ({ row, col }) => {
     const adjacent = [
         { row: row + 1, col },
         { row: row - 1, col },
@@ -14,42 +20,24 @@ const isNumberAdjacentToSymbol = ({ row, col }) => {
         { row: row - 1, col: col - 1 },
         { row: row - 1, col: col + 1 },
         { row: row + 1, col: col - 1 },
-    ].filter(({ row, col }) => row >= 0 && col >= 0);
+    ];
 
-    console.log(`adjacent to { row: ${row}, col: ${col} }`, adjacent);
-
-    return adjacent.some(({ row: adjacentRow, col: adjacentCol }) => {
-        return symbols.some(({ row: symbolRow, col: symbolCol }) => {
-            return adjacentRow === symbolRow && adjacentCol === symbolCol;
-        });
-    });
+    return adjacent.some(({ row, col }) => matrix[row] && matrix[row][col] && matrix[row][col].match(/[^\.\d\n\r]/));
 };
 
-const symbols = inputArray.reduce((syms, currentLine, row) => {
-    currentLine.split('').forEach((char, col) => {
-        if (char.match(/[^\.\d]/)) {
-            syms.push({ row, col, char });
-        }
-    });
-    return syms;
-}, []);
-// console.log(symbols);
-
 const total = inputArray.reduce((sum, currentLine, row, arr) => {
-    console.log(arr[row-1]);
-    console.log(currentLine);
-    console.log(arr[row+1]);
+    console.log(row-1, arr[row-1]);
+    console.log(row, currentLine);
+    console.log(row+1, arr[row+1]);
     currentLine.split(/\D/).filter(str => str).forEach((num) => {
         const indexOfNumber = currentLine.indexOf(num);
-        
-        for(let i in num.split('')) {
+        const numArr = num.split('');
+        for(let i in numArr) {
             const col = Number(i) + indexOfNumber;
-            console.log(num, 'indexOfNumber', indexOfNumber, `checking ${row}, ${col}`, isNumberAdjacentToSymbol({ row, col }));
-            // console.log(`checking ${row}, ${col}`);
+            console.log(num, 'digit', numArr[i], 'indexOfNumber', indexOfNumber, `checking ${row}, ${col}`, isNumberAdjacentToSymbol({ row, col }));
             if (isNumberAdjacentToSymbol({ row, col })) {
-                // console.log('adjacent!', sum += Number(num));
                 sum += Number(num);
-                console.log('adjacent!', sum);
+                console.log('adjacent!', sum, row, col);
                 break;
             }
         }
@@ -59,4 +47,3 @@ const total = inputArray.reduce((sum, currentLine, row, arr) => {
 }, 0);
 
 console.log(total);
-// console.log(symbols.length);
